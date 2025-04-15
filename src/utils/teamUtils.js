@@ -20,9 +20,11 @@ export function parseGroupsFromText(text) {
 }
 
 export function getShuffledTeams(aGroup, bGroup, cGroup) {
-  const a = [...aGroup];
-  const b = [...bGroup];
-  const c = [...cGroup];
+  const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+  const a = shuffle(aGroup);
+  const b = shuffle(bGroup);
+  const c = shuffle(cGroup);
   const teams = [];
 
   // 기본 조 짜기
