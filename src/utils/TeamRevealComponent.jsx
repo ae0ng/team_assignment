@@ -11,9 +11,10 @@ export default function TeamReveal() {
   const [fileLoaded, setFileLoaded] = useState(false);
 
   // ⏱ 타이머 관련 상태
-  const [timeLeft, setTimeLeft] = useState(20 * 60); // 20분(초)
-  const [isPaused, setIsPaused] = useState(false);
-  const [customMinutes, setCustomMinutes] = useState(20); // 사용자가 설정할 분 단위 시간
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isPaused, setIsPaused] = useState(true);
+  const [customMinutes, setCustomMinutes] = useState(0);
+  const [customSeconds, setCustomSeconds] = useState(0);
 
   // ⏱ 타이머 시작/정지 효과
   useEffect(() => {
@@ -65,8 +66,8 @@ export default function TeamReveal() {
   };
 
   const handleSetTimer = () => {
-    const seconds = customMinutes * 60;
-    setTimeLeft(seconds);
+    const totalSeconds = customMinutes * 60 + customSeconds;
+    setTimeLeft(totalSeconds);
     setIsPaused(false);
   };
 
@@ -132,7 +133,7 @@ export default function TeamReveal() {
               </button>
               <button
                 onClick={() => {
-                  setTimeLeft(customMinutes * 60);
+                  setTimeLeft(customMinutes * 60 + customSeconds);
                   setIsPaused(true);
                 }}
                 style={{ marginLeft: "1rem" }}
@@ -143,11 +144,21 @@ export default function TeamReveal() {
             <div style={{ marginTop: "0.5rem" }}>
               <input
                 type="number"
-                min="1"
+                min="0"
                 value={customMinutes}
                 onChange={(e) => setCustomMinutes(Number(e.target.value))}
+                style={{ width: "60px", marginRight: "0.5rem" }}
               />
-              <span> 분으로 설정</span>
+              분
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={customSeconds}
+                onChange={(e) => setCustomSeconds(Number(e.target.value))}
+                style={{ width: "60px", margin: "0 0.5rem" }}
+              />
+              초
               <button onClick={handleSetTimer} style={{ marginLeft: "1rem" }}>
                 ⏱ 적용
               </button>
