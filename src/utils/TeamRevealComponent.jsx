@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Users } from "lucide-react";
 import { parseGroupsFromText, getShuffledTeams } from "./teamUtils";
@@ -10,7 +10,37 @@ export default function TeamReveal() {
   const [showFinal, setShowFinal] = useState(false);
   const [teams, setTeams] = useState([]);
   const [fileLoaded, setFileLoaded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(20 * 60);
+  const [isPaused, setIsPaused] = useState(false);
+  const [timerStarted, setTimerStarted] = useState(false);
+  
 
+  useEffect(() => {
+    if (!showFinal) return;
+  
+    setTimerStarted(true); // 타이머 시작 상태 표시
+  
+    const timer = setInterval(() => {
+      if (!isPaused) {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
+    }, 1000);
+  
+    return () => clearInterval(timer);
+  }, [showFinal, isPaused]);
+
+  const formatTime = (seconds) => {
+    const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const s = String(seconds % 60).padStart(2, "0");
+    return `${m}:${s}`;
+  };
+  
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -33,10 +63,12 @@ export default function TeamReveal() {
     if (step < teams.length) setStep((prev) => prev + 1);
     else setShowFinal(true);
   };
+  
+  
 
   return (
     <div className="container">
-      <h1>⭐ 밀알 조 발표 ⭐</h1>
+      <h1>⭐ 홀리씨드 조 발표 ⭐</h1>
 
       {!fileLoaded && (
         <div className="upload-section">
@@ -86,6 +118,24 @@ export default function TeamReveal() {
           className="final-teams"
         >
           <h2>🎉 최종 팀 결과 🎉</h2>
+
+          <div className="timer">
+      ⏰ 남은 시간: <strong>{formatTime(timeLeft)}</strong>
+      <div style={{ marginTop: "0.5rem" }}>
+        <button onClick={() => setIsPaused((prev) => !prev)}>
+          {isPaused ? "▶️ 다시 시작" : "⏸ 일시정지"}
+        </button>
+        <button
+          onClick={() => {
+            setTimeLeft(20 * 60);
+            setIsPaused(true);
+          }}
+          style={{ marginLeft: "1rem" }}
+        >
+          🔄 리셋
+        </button>
+      </div>
+    </div>
           <div className="grid-container">
             {teams.map((team, i) => (
               <div key={i} className="team-card">
