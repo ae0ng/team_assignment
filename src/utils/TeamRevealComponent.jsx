@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Loader2, Users } from "lucide-react";
 import { parseGroupsFromText, getShuffledTeams } from "./teamUtils";
 
-
 export default function TeamReveal() {
   const [step, setStep] = useState(0);
   const [revealing, setRevealing] = useState(false);
@@ -11,10 +10,14 @@ export default function TeamReveal() {
   const [teams, setTeams] = useState([]);
   const [fileLoaded, setFileLoaded] = useState(false);
 
-  const [timeLeft, setTimeLeft] = useState(20 * 60); // 20분 (초)
+  // ⏱ 타이머 관련 상태
+  const [timeLeft, setTimeLeft] = useState(20 * 60); // 20분(초)
   const [isPaused, setIsPaused] = useState(false);
+  const [customMinutes, setCustomMinutes] = useState(20); // 사용자가 설정할 분 단위 시간
+
+  // ⏱ 타이머 시작/정지 효과
   useEffect(() => {
-    if (!showFinal) return; // 최종 팀 결과가 보여질 때만 실행
+    if (!showFinal) return;
 
     const timer = setInterval(() => {
       if (!isPaused) {
@@ -28,7 +31,6 @@ export default function TeamReveal() {
       }
     }, 1000);
 
-    // 클린업: 컴포넌트 언마운트나 종속성 변경 시 인터벌 해제
     return () => clearInterval(timer);
   }, [showFinal, isPaused]);
 
@@ -38,7 +40,7 @@ export default function TeamReveal() {
     const s = String(seconds % 60).padStart(2, "0");
     return `${m}:${s}`;
   };
-  
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -61,8 +63,12 @@ export default function TeamReveal() {
     if (step < teams.length) setStep((prev) => prev + 1);
     else setShowFinal(true);
   };
-  
-  
+
+  const handleSetTimer = () => {
+    const seconds = customMinutes * 60;
+    setTimeLeft(seconds);
+    setIsPaused(false);
+  };
 
   return (
     <div className="container">
@@ -116,6 +122,7 @@ export default function TeamReveal() {
           className="final-teams"
         >
           <h2>🎉 최종 팀 결과 🎉</h2>
+
           {/* ⏱ 타이머 UI */}
           <div className="timer">
             ⏰ 남은 시간: <strong>{formatTime(timeLeft)}</strong>
@@ -125,7 +132,7 @@ export default function TeamReveal() {
               </button>
               <button
                 onClick={() => {
-                  setTimeLeft(20 * 60);
+                  setTimeLeft(customMinutes * 60);
                   setIsPaused(true);
                 }}
                 style={{ marginLeft: "1rem" }}
@@ -133,9 +140,20 @@ export default function TeamReveal() {
                 🔄 리셋
               </button>
             </div>
+            <div style={{ marginTop: "0.5rem" }}>
+              <input
+                type="number"
+                min="1"
+                value={customMinutes}
+                onChange={(e) => setCustomMinutes(Number(e.target.value))}
+              />
+              <span> 분으로 설정</span>
+              <button onClick={handleSetTimer} style={{ marginLeft: "1rem" }}>
+                ⏱ 적용
+              </button>
+            </div>
           </div>
 
-          
           <div className="grid-container">
             {teams.map((team, i) => (
               <div key={i} className="team-card">
